@@ -1,8 +1,8 @@
-DODAC multi bicia KINDA JEST
+DODAC multi bicia JEST
 Dodac win condition JEST
-
-
-
 dodac damki albo cos do ruszania do tylu
+
+
+
 dodac ui
 dodac ai

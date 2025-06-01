@@ -14,13 +14,15 @@ public:
 
     Board();
     ~Board();
-    bool makeMove(Move& move);
+    void makeMove(Move& move);
     bool isInside(int row,int col);
     bool isGameOver();
     vector<Move> genMoves(Player player);
     void drawBoard();
     void printMoves(vector<Move>& moves);
-    void promotion(Piece p);
+    void znajdz_bicia(Position from, Position current, Player player,
+                               std::vector<Position> zbite, std::vector<Move>& moves,
+                               std::vector<std::vector<bool>>& visited);
 
 
 };

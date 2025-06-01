@@ -44,17 +44,17 @@ bool Board::isInside(int row,int col)
     }
 }
 
-bool Board::makeMove(Move& move)
+void Board::makeMove(Move& move)
 {
     //Ruch piona
     Piece& moving = board[move.from.row][move.from.col];
     board[move.to.row][move.to.col] = moving;
     board[move.from.row][move.from.col] = Piece();
-    if(board[move.to.row][move.to.col].owner==White && move.to.col==7)
+    if(board[move.to.row][move.to.col].owner==White && move.to.row==0)
     {
         board[move.to.row][move.to.col].type=Queen;
     }
-    else if (board[move.to.row][move.to.col].owner==Black && move.to.col==0)
+    else if (board[move.to.row][move.to.col].owner==Black && move.to.row==7)
     {
         board[move.to.row][move.to.col].type=Queen;
     }
@@ -62,9 +62,9 @@ bool Board::makeMove(Move& move)
     // Zbijanie (jeśli są pozycje do zbicia)
     for (Position pos : move.capture) {
         board[pos.row][pos.col] = Piece();
-        return true;
+
     }
-    return false;
+
 }
 
 bool Board::isGameOver() {
@@ -87,8 +87,6 @@ std::vector<Move> Board::genMoves(Player player) {
     std::vector<Move> moves;
     int direction;
     bool bicie=false;
-    bool after_bicie=false;
-
 
     if(player==White)
     {
@@ -105,39 +103,112 @@ std::vector<Move> Board::genMoves(Player player) {
             if (p.owner != player)
                 continue;
 
-            // Ruchy do przodu (lewo/prawo)
-            for (int dx = -1; dx <= 1; dx += 2) {
-                int newRow = row + direction;
-                int newCol = col + dx;
+            std::vector<std::vector<bool>> visited(8, std::vector<bool>(8, false));
+            std::vector<Position> zbite;
+            std::vector<Move> bicia;
+            znajdz_bicia({row, col}, {row, col}, player, zbite, bicia, visited);
 
-                //Zwykle ruch pionkow
-                if (isInside(newRow, newCol) && board[newRow][newCol].owner == Noone&& !bicie) {
-                    
-                    moves.push_back(Move({ row, col }, { newRow, newCol},{-1,-1}));
-                }
-
-                //Sprawdzenia bicia
-                else if((board[newRow][newCol].owner != Noone&&board[newRow][newCol].owner != player )&& isInside(newRow + direction, newCol+dx) && board[newRow + direction][newCol+dx].owner == Noone)
-                {   
-                    if(!after_bicie)
-                    {
-                        moves.clear();
-                        after_bicie=true;
-                    }
-                    if(!bicie)
-                    {
-                        bicie=true;
-                    }
-                    moves.push_back(Move({ row, col }, { newRow+direction, newCol+dx},{newRow,newCol} ));
-                }
-                
+            if (!bicia.empty()) {
+                bicie = true;
+                moves.insert(moves.end(), bicia.begin(), bicia.end());
             }
         }
     }
 
-    return moves;
-}
 
+    if (bicie) {
+        return moves;
+    }
+
+    vector<Move> normlaMoves;
+    for (int row = 0; row < 8; ++row) {
+        for (int col = 0; col < 8; ++col) {
+            Piece p = board[row][col];
+            if (p.owner != player)
+                continue;
+
+            // Ruchy do przodu (lewo/prawo)
+            if (p.type==Pawn) {
+                for (int dx = -1; dx <= 1; dx += 2) {
+                    int newRow = row + direction;
+                    int newCol = col + dx;
+
+                    //Zwykle ruch pionkow
+                    if (isInside(newRow, newCol) && board[newRow][newCol].owner == Noone) {
+                        normlaMoves.push_back(Move({ row, col }, { newRow, newCol},{-1,-1}));
+                    }
+                }
+            }
+            else {
+                for (int dx = -1; dx <= 1; dx += 2) {
+                    int newRow = row + direction;
+                    int newCol = col + dx;
+                    while (isInside(newRow, newCol)) {
+                        if (board[newRow][newCol].owner == Noone) {
+                            normlaMoves.push_back(Move({ row, col }, { newRow, newCol},{-1,-1}));
+                        }
+                        newRow += direction;
+                        newCol += dx;
+                    }
+                }
+                for (int dx = -1; dx <= 1; dx += 2) {
+                    int newRow = row - direction;
+                    int newCol = col + dx;
+                    while (isInside(newRow, newCol)) {
+                        if (board[newRow][newCol].owner == Noone) {
+                            normlaMoves.push_back(Move({ row, col }, { newRow, newCol},{-1,-1}));
+                        }
+                        newRow -= direction;
+                        newCol += dx;
+                    }
+                }
+            }
+        }
+    }
+
+    return normlaMoves;
+}
+void Board::znajdz_bicia(Position from, Position current, Player player,
+                               std::vector<Position> zbite, std::vector<Move>& moves,
+                               std::vector<std::vector<bool>>& visited) {
+    bool do_bicia = false;
+    int direction[4][2] = {{-1,-1}, {-1,1}, {1,-1}, {1,1}};
+
+    for (auto& [dr, dc] : direction) {
+        int midR = current.row + dr;
+        int midC = current.col + dc;
+        int landR = current.row + 2 * dr;
+        int landC = current.col + 2 * dc;
+
+        if (!isInside(landR,landC) || !isInside(midR,midC))
+            continue;
+
+        Piece enemy = board[midR][midC];
+        Piece target = board[landR][landC];
+
+        if (enemy.owner != Noone && enemy.owner != player &&
+            target.owner == Noone && !visited[midR][midC]) {
+
+            // Symulacja ruchu
+            visited[midR][midC] = true;
+            zbite.push_back({midR, midC});
+
+            // Rekurencja – sprawdzanie dalszych bić
+            znajdz_bicia(from, {landR, landC}, player, zbite, moves, visited);
+
+            // Cofnięcie stanu
+            visited[midR][midC] = false;
+            zbite.pop_back();
+
+            do_bicia = true;
+            }
+    }
+
+    if (!do_bicia && !zbite.empty()) {
+        moves.push_back(Move(from, current));
+        moves.back().capture = zbite;
+    }
+}
 void Board::drawBoard()  {
     cout << "   A B C D E F G H\n";
     for (int row = 0; row < 8; ++row) {

@@ -4,14 +4,15 @@
 int main() {
     Board board;
     Player current = White;
-    bool zbicie=false;
+    board.board[5][0].type=Queen;
     bool game=true;
+
     while (game) {
-        
         board.drawBoard();
         std::vector<Move> moves = board.genMoves(current);
         game=board.isGameOver();
         board.printMoves(moves);
+
 
         std::string input;
         std::cout << current;
@@ -34,23 +35,21 @@ int main() {
         for ( Move& m : moves) {
             if (m.from.row == chosen.from.row && m.from.col == chosen.from.col &&
                 m.to.row == chosen.to.row && m.to.col == chosen.to.col) {
-                zbicie=board.makeMove(m);
+                board.makeMove(m);
                 found = true;
-                if(!zbicie){
-                    if(current==White)
+                if(current==White)
                     {
                         current=Black;
                     }
-                    else
+                else
                     {
                         current=White;
                     }
                     
-                }
+
                 break;
             }
         }
-        system("clear");
         if (!found) {
             std::cout << "Niepoprawny ruch!\n";
         }
