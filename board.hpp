@@ -11,9 +11,11 @@ class Board
 
 public:
     Piece board[8][8];
-
+    int Pieces_count[4]={0,0,0,0};
     Board();
     ~Board();
+    Board(const Board& b);
+    int evaulate(Player currentplayer);
     void makeMove(Move& move);
     bool isInside(int row,int col);
     bool isGameOver();

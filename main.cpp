@@ -1,16 +1,27 @@
 #include <iostream>
+
+#include "AI.hpp"
 #include "board.hpp"
 
 int main() {
     Board board;
     Player current = White;
-    board.board[5][0].type=Queen;
     bool game=true;
+    AI ai;
 
     while (game) {
-        board.drawBoard();
+        if (current==White) {
+            board.drawBoard();
+        }
         std::vector<Move> moves = board.genMoves(current);
         game=board.isGameOver();
+        if (current==Black) {
+            Move ai_move= ai.MakeBestMove(Black,7,board);
+            board.makeMove(ai_move);
+            current=White;
+            cout<<"AI"<<endl;
+            continue;
+        }
         board.printMoves(moves);
 
 

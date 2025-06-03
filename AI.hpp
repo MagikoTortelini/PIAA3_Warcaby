@@ -6,9 +6,11 @@ using namespace std;
 
 class AI
 {
-    Move getBestMove(Board& board, Player aiPlayer, int depth);
-
-    int minimax(Board& board, int depth, bool isMax,int alpha, int beta,Player currentPlayer);
+    public:
+    AI();
+    ~AI();
+    Move MakeBestMove(Player ai,int depth, Board board);
+    int minimax(Board board, int depth, int alpha, int beta, Player currentPlayer);
 };
 
 

@@ -1,66 +1,73 @@
 #include "AI.hpp"
-#include <limits>
+#include <algorithm>
 
-Move AI::getBestMove(Board& board, Player aiPlayer, int depth) {
-    int bestScore = std::numeric_limits<int>::min();
-    Move bestMove;
-    auto moves = board.genMoves(aiPlayer);
 
-    for (Move move : moves) {
-        std::vector<Piece> captured;
-        for (auto pos : move.capture)
-            captured.push_back(board.board[pos.row][pos.col]);
+using namespace std;
 
-        board.makeMove(move);
-        int score = minimax(board, depth - 1, false, -10000, 10000, aiPlayer);
+AI::AI()=default;
+AI::~AI()=default;
 
-        if (score > bestScore) {
-            bestScore = score;
-            bestMove = move;
+Move AI::MakeBestMove(Player ai,int depth, Board board) {
+    int bestscore = -999999;
+    Move bestmove;
+
+    vector<Move> moves=board.genMoves(ai);
+
+    for (auto& move : moves) {
+        Board newBoard = board;
+        newBoard.makeMove(move);
+        if (ai==White) {
+            int score = minimax(board,depth-1,-99999,99999,Black);
+            if (score>bestscore) {
+                bestscore = score;
+            }
         }
-    }
+        else {
+            int score = minimax(board,depth-1,-99999,99999,White);
+            if (score>bestscore) {
+                bestscore = score;
+                bestmove = move;
+            }
+        }
 
-    return bestMove;
+    }
+    return bestmove;
 }
 
-int AI::minimax(Board& board, int depth, bool isMax, int alpha, int beta, Player aiPlayer) {
-    if (depth == 0 || board.isGameOver()) {
-        return board.evaluate(aiPlayer);
+
+int AI::minimax(Board board, int depth, int alpha, int beta, Player currentPlayer) {
+    if (board.isGameOver() || depth==0) {
+        return board.evaulate(currentPlayer);
+    }
+    if (currentPlayer==Black) {
+        vector<Move> moves = board.genMoves(currentPlayer);
+        int value=-999999;
+        for (Move& move: moves) {
+            Board newBoard = board;
+            newBoard.makeMove(move);
+            value=max(value,minimax(board,depth-1,alpha,beta,White));
+            if (value>beta)
+            {
+                break;
+            }
+            alpha=max(alpha,value);
+        }
+        return value;
+    }
+    else {
+        vector<Move> moves = board.genMoves(currentPlayer);
+        int value=9999999;
+        for (Move& move: moves) {
+            Board newBoard = board;
+            newBoard.makeMove(move);
+            value=max(value,minimax(board,depth-1,alpha,beta,Black));
+            if (value<=alpha)
+            {
+                break;
+            }
+            beta=min(beta,value);
+        }
+        return value;
     }
 
-    Player current = isMax ? aiPlayer : (aiPlayer == White ? Black : Black);
-    auto moves = board.genMoves(current);
-
-    if (isMax) {
-        int best = -10000;
-        for (Move move : moves) {
-            std::vector<Piece> captured;
-            for (auto pos : move.capture)
-                captured.push_back(board.board[pos.row][pos.col]);
-
-            board.makeMove(move);
-            int score = minimax(board, depth - 1, false, alpha, beta, aiPlayer);
-
-
-            best = std::max(best, score);
-            alpha = std::max(alpha, score);
-            if (beta <= alpha) break;
-        }
-        return best;
-    } else {
-        int best = 10000;
-        for (Move move : moves) {
-            std::vector<Piece> captured;
-            for (auto pos : move.capture)
-                captured.push_back(board.board[pos.row][pos.col]);
-
-            board.makeMove(move);
-            int score = minimax(board, depth - 1, true, alpha, beta, aiPlayer);
-
-            best = std::min(best, score);
-            beta = std::min(beta, score);
-            if (beta <= alpha) break;
-        }
-        return best;
-    }
 }

@@ -1,8 +1,6 @@
-DODAC multi bicia JEST
-Dodac win condition JEST
-dodac damki albo cos do ruszania do tylu
-
+Dodac win condition  DO TESTU
+dodac damki naprawić poruszanie sie. Damki przeskaują przez pionki i bicie na odległość
+dodac ai. USPRAWNIĆ
 
 
 dodac ui
-dodac ai
