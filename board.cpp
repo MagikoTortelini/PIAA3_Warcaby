@@ -295,10 +295,6 @@ void Board::printMoves( std::vector<Move>& moves)  {
     }
 }
 int Board::evaulate(Player currentplayer) {
-    if (currentplayer==Black) {
-        return (Pieces_count[0]-Pieces_count[1]+2*(Pieces_count[2]-Pieces_count[3]));
-    }
-    else {
-        return (Pieces_count[1]-Pieces_count[2]+2*(Pieces_count[3]-Pieces_count[2]));
-    }
+        return (Pieces_count[1]-Pieces_count[0]+2*(Pieces_count[3]-Pieces_count[2]));
+
 }
