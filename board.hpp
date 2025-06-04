@@ -6,6 +6,9 @@
 
 using namespace std;
 
+
+
+
 class Board
 {
 
@@ -23,9 +26,8 @@ public:
     void drawBoard();
     void printMoves(vector<Move>& moves);
     void znajdz_bicia(Position from, Position current, Player player,
-                               std::vector<Position> zbite, std::vector<Move>& moves,
-                               std::vector<std::vector<bool>>& visited);
-
+                         std::vector<Position> zbite, std::vector<Move> &moves,
+                         std::vector<std::vector<bool> > &visited, Position dir, bool ispawn);
 
 };
 

@@ -4,6 +4,8 @@
 
 using namespace std;
 
+
+//TYPY POMOCNICZNE DO USTALENIE WARTOSCI PIONKA
 enum PieceType {None,Pawn,Queen};
 enum Player {Noone,White,Black};
 
