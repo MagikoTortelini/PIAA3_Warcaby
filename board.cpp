@@ -1,6 +1,8 @@
 #include "board.hpp"
 #include <iostream>
 
+using namespace std;
+
 Board::~Board()=default;
 
 Board::Board(const Board& b) {
@@ -139,16 +141,70 @@ std::vector<Move> Board::genMoves(Player player) {
             Piece p = board[row][col];
             if (p.owner != player)
                 continue;
-
-            std::vector<std::vector<bool>> visited(8, std::vector<bool>(8, false));
             std::vector<Position> zbite;
             std::vector<Move> bicia;
+            if(p.type==Pawn){
+            std::vector<std::vector<bool>> visited(8, std::vector<bool>(8, false));
+            
             znajdz_bicia({row, col}, {row, col}, player, zbite, bicia, visited);
-
             if (!bicia.empty()) {
                 bicie = true;
                 moves.insert(moves.end(), bicia.begin(), bicia.end());
             }
+            }
+            else if(p.type==Queen)
+            {
+                std::vector<Move> Queen_move;
+                for (int dx = -1; dx <= 1; dx += 2) {
+                    int newRow = row + direction;
+                    int newCol = col + dx;
+                    while (isInside(newRow, newCol)) {
+                        if (board[newRow][newCol].owner == Noone) {
+                            Queen_move.push_back(Move({ row, col }, { newRow, newCol},{-1,-1}));
+                        }
+                        else{
+                            break;
+                        }
+                        newRow += direction;
+                        newCol += dx;            
+                    }
+                }
+                for (int dx = -1; dx <= 1; dx += 2) {
+                    int newRow = row - direction;
+                    int newCol = col + dx;
+                    while (isInside(newRow, newCol)) {
+                        if (board[newRow][newCol].owner == Noone) {
+                            Queen_move.push_back(Move({ row, col }, { newRow, newCol},{-1,-1}));
+                        }
+                        else{
+                            break;
+                        }
+                        newRow -= direction;
+                        newCol += dx;                
+                    }
+                }
+                if(!Queen_move.empty()){
+                for(auto& move : Queen_move){
+                        std::vector<std::vector<bool>> visited(8, std::vector<bool>(8, false));
+
+                        znajdz_bicia({move.from.row, move.from.col}, {move.to.row, move.to.col}, player, zbite, bicia, visited);
+                    
+                } 
+                }
+                else{
+                    std::vector<std::vector<bool>> visited(8, std::vector<bool>(8, false));
+                    znajdz_bicia({row, col}, {row, col}, player, zbite, bicia, visited);
+                }
+                }
+                if (!bicia.empty()) {
+                        bicie = true;
+                        moves.insert(moves.end(), bicia.begin(), bicia.end());
+                }
+            
+        
+            
+            
+            
         }
     }
 
@@ -184,8 +240,12 @@ std::vector<Move> Board::genMoves(Player player) {
                         if (board[newRow][newCol].owner == Noone) {
                             normlaMoves.push_back(Move({ row, col }, { newRow, newCol},{-1,-1}));
                         }
+                        else{
+                            break;
+                        }
                         newRow += direction;
                         newCol += dx;
+                        
                     }
                 }
                 for (int dx = -1; dx <= 1; dx += 2) {
@@ -195,8 +255,12 @@ std::vector<Move> Board::genMoves(Player player) {
                         if (board[newRow][newCol].owner == Noone) {
                             normlaMoves.push_back(Move({ row, col }, { newRow, newCol},{-1,-1}));
                         }
+                        else{
+                            break;
+                        }
                         newRow -= direction;
                         newCol += dx;
+                        
                     }
                 }
             }
@@ -211,35 +275,42 @@ void Board::znajdz_bicia(Position from, Position current, Player player,
     bool do_bicia = false;
     int direction[4][2] = {{-1,-1}, {-1,1}, {1,-1}, {1,1}};
 
+
     for (auto& [dr, dc] : direction) {
-        int midR = current.row + dr;
-        int midC = current.col + dc;
-        int landR = current.row + 2 * dr;
-        int landC = current.col + 2 * dc;
+            int midR = current.row + dr;
+            int midC = current.col + dc;
+            int landR = current.row + 2 * dr;
+            int landC = current.col + 2 * dc;
 
-        if (!isInside(landR,landC) || !isInside(midR,midC))
-            continue;
+            if (!isInside(landR,landC) || !isInside(midR,midC))
+                continue;
 
-        Piece enemy = board[midR][midC];
-        Piece target = board[landR][landC];
+            Piece enemy = board[midR][midC];
+            Piece target = board[landR][landC];
 
-        if (enemy.owner != Noone && enemy.owner != player &&
-            target.owner == Noone && !visited[midR][midC]) {
+            if (enemy.owner != Noone && enemy.owner != player &&
+                target.owner == Noone && !visited[midR][midC]) {
 
-            // Symulacja ruchu
-            visited[midR][midC] = true;
-            zbite.push_back({midR, midC});
+                // Symulacja ruchu
+                visited[midR][midC] = true;
+                zbite.push_back({midR, midC});
 
-            // Rekurencja – sprawdzanie dalszych bić
-            znajdz_bicia(from, {landR, landC}, player, zbite, moves, visited);
+                // Rekurencja – sprawdzanie dalszych bić
+                znajdz_bicia(from, {landR, landC}, player, zbite, moves, visited);
 
-            // Cofnięcie stanu
-            visited[midR][midC] = false;
-            zbite.pop_back();
+                // Cofnięcie stanu
+                visited[midR][midC] = false;
+                zbite.pop_back();
 
-            do_bicia = true;
-            }
-    }
+                do_bicia = true;
+                }
+        }
+    
+    
+            
+        
+    
+    
 
     if (!do_bicia && !zbite.empty()) {
         moves.push_back(Move(from, current));

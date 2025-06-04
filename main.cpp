@@ -8,6 +8,15 @@ int main() {
     Player current = White;
     bool game=true;
     AI ai;
+    board.board[2][3].type=None;
+    board.board[2][3].owner=Noone;
+    board.board[3][2].type=Pawn;
+    board.board[3][2].owner=Black;
+     board.board[0][5].type=None;
+    board.board[0][5].owner=Noone;
+    board.board[5][0].type=Queen;
+
+
 
     while (game) {
         if (current==White) {
