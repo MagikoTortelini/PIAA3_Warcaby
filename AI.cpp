@@ -36,7 +36,7 @@ Move AI::MakeBestMove(Player ai,int depth, Board board) {
 
 
 int AI::minimax(Board board, int depth, int alpha, int beta, Player currentPlayer) {
-    if (board.isGameOver() || depth==0) {
+    if (!board.isGameOver() || depth==0) {
         return board.evaulate(currentPlayer);
     }
     if (currentPlayer==Black) {
