@@ -45,9 +45,21 @@ Move AI::MakeBestMove(Player ai,int depth, Board board) {
 
 
 int AI::minimax(Board board, int depth, int alpha, int beta, Player currentPlayer) {
-    if (!board.isGameOver() || depth==0) {
+    if (board.isGameOver(false) || depth==0) {
         return board.evaulate(currentPlayer);
     }
+     vector<Move> moves = board.genMoves(currentPlayer);
+    
+    // Jeśli brak ruchów, gra się kończy
+    if (moves.empty()) {
+        // Gracz który nie ma ruchów przegrywa
+        if (currentPlayer == White) {
+            return -999999; // Biały przegrywa
+        } else {
+            return 999999;  // Czarny przegrywa (dla białego to dobre)
+        }
+    }
+
     if (currentPlayer==Black) {
         vector<Move> moves = board.genMoves(currentPlayer);
         int value=999999;

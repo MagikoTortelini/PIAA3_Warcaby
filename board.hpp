@@ -13,6 +13,7 @@ class Board
 {
 
 public:
+    int draw_counter=0;
     Piece board[8][8];
     int Pieces_count[4]={0,0,0,0};
     Board();
@@ -21,13 +22,13 @@ public:
     int evaulate(Player currentplayer);
     void makeMove(Move& move);
     bool isInside(int row,int col);
-    bool isGameOver();
+    bool isGameOver(bool Finalend);
     vector<Move> genMoves(Player player);
     void drawBoard();
     void printMoves(vector<Move>& moves);
     void znajdz_bicia(Position from, Position current, Player player,
                          std::vector<Position> zbite, std::vector<Move> &moves,
-                         std::vector<std::vector<bool> > &visited, Position dir, bool ispawn);
+                          Position dir, bool ispawn);
 
 };
 
